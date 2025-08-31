@@ -2,21 +2,71 @@
 
 ## Render (Recomendado - Gratuito)
 
-### Passo a Passo:
-1. **Fork do repositório** no GitHub
-2. **Acesse** [render.com](https://render.com) e crie conta
-3. **Clique em "New +"** → "Web Service"
-4. **Conecte** seu repositório GitHub
-5. **Configure:**
+### 🎯 Deploy Automático via GitHub
+
+#### Pré-requisitos:
+- ✅ Repositório no GitHub: [gabrielvieiragaspar/email-classifier](https://github.com/gabrielvieiragaspar/email-classifier)
+- ✅ Chave de API do Google Gemini
+
+#### Passo a Passo:
+1. **Acesse** [render.com](https://render.com) e crie conta gratuita
+2. **Clique em "New +"** → "Web Service"
+3. **Conecte seu repositório GitHub**:
+   - Selecione "Connect a repository"
+   - Escolha `gabrielvieiragaspar/email-classifier`
+4. **Configure o serviço**:
    - **Name**: `email-classifier-autou`
    - **Environment**: `Python 3`
+   - **Region**: Escolha a mais próxima (ex: US East)
+   - **Branch**: `master`
+   - **Root Directory**: Deixe em branco (raiz do projeto)
+5. **Configure os comandos**:
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app`
-6. **Adicione variáveis de ambiente:**
+   - **Start Command**: `gunicorn app:app --bind 0.0.0.0:$PORT`
+6. **Adicione variáveis de ambiente**:
    - `GOOGLE_API_KEY`: sua chave do Google Gemini
-7. **Clique em "Create Web Service"**
+   - `PORT`: Deixe Render definir automaticamente
+7. **Configurações avançadas**:
+   - **Auto-Deploy**: ✅ Habilitado (deploy automático a cada push)
+   - **Health Check Path**: `/` (rota principal)
+8. **Clique em "Create Web Service"**
 
 ⏱️ **Tempo estimado**: 5-10 minutos
+
+### 🔧 Deploy via render.yaml (Automático)
+
+Se preferir usar o arquivo `render.yaml` já configurado:
+
+1. **Render detectará automaticamente** as configurações
+2. **Clique em "Create Web Service"** e Render usará as configurações do arquivo
+
+**Conteúdo do `render.yaml`:**
+```yaml
+services:
+  - type: web
+    name: email-classifier-autou
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false
+```
+
+### 📊 Após o Deploy
+
+- ✅ **URL da aplicação**: `https://seu-app.onrender.com`
+- ✅ **Deploy automático** a cada push para `master`
+- ✅ **Logs em tempo real** disponíveis no dashboard
+- ✅ **Health checks** automáticos
+- ✅ **SSL gratuito** incluído
+
+### 📈 Monitoramento e Manutenção
+
+- **Logs**: Acesse via dashboard do Render
+- **Métricas**: CPU, memória e tempo de resposta
+- **Uptime**: Monitoramento automático de disponibilidade
+- **Escalabilidade**: Upgrade para planos pagos quando necessário
 
 ## Vercel (Alternativa - Gratuito)
 
@@ -56,17 +106,24 @@
 
 ## 🔧 Troubleshooting
 
-### Erro de Build
+### Erro de Build no Render
 - Verifique se `requirements.txt` está correto
 - Confirme versão do Python (3.8+)
+- Verifique se o `render.yaml` está configurado corretamente
 
-### Erro de Runtime
-- Verifique variáveis de ambiente
+### Erro de Runtime no Render
+- Verifique se a variável `GOOGLE_API_KEY` está configurada
 - Confirme se a API key do Google Gemini é válida
+- Verifique logs no dashboard do Render
 
 ### Erro de CORS
 - A aplicação já está configurada com CORS
 - Se persistir, verifique configurações da plataforma
+
+### Problemas Comuns no Render
+- **Timeout de build**: Aumente o timeout nas configurações
+- **Erro de memória**: Verifique se não há vazamentos de memória
+- **Health check falhando**: Verifique se a rota `/` está funcionando
 
 ---
 
