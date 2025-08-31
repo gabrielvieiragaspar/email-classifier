@@ -8,23 +8,23 @@ import re
 import datetime
 from dotenv import load_dotenv
 
-# Load environment variables
+# Carrega variáveis de ambiente
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Server configuration will be set in app.run()
+# A configuração do servidor será definida em app.run()
 
-# Configure Google Gemini API
+# Configura API do Google Gemini
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 def preprocess_text(text):
     """
-    Preprocess the email text by removing unnecessary content and cleaning it up.
+    Pré-processa o texto do email removendo conteúdo desnecessário e limpando-o.
     """
-    # Remove email headers
+    # Remove cabeçalhos do email
     text = re.sub(r'^.*From:.*$', '', text, flags=re.MULTILINE)
     text = re.sub(r'^.*To:.*$', '', text, flags=re.MULTILINE)
     text = re.sub(r'^.*Subject:.*$', '', text, flags=re.MULTILINE)
@@ -33,17 +33,17 @@ def preprocess_text(text):
     # Remove URLs
     text = re.sub(r'http\S+', '', text)
     
-    # Remove special characters but keep essential punctuation
+    # Remove caracteres especiais mas mantém pontuação essencial
     text = re.sub(r'[^\w\s.,!?;:]', '', text)
     
-    # Remove extra whitespace
+    # Remove espaços em branco extras
     text = re.sub(r'\s+', ' ', text).strip()
     
     return text
 
 def extract_text_from_pdf(file):
     """
-    Extract text content from a PDF file.
+    Extrai o conteúdo de texto de um arquivo PDF.
     """
     pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.read()))
     text = ""
@@ -53,8 +53,8 @@ def extract_text_from_pdf(file):
 
 def classify_email(text):
     """
-    Use Google Gemini API to classify the email as productive or unproductive.
-    Enhanced with better prompts and confidence calculation.
+    Usa a API do Google Gemini para classificar o email como produtivo ou improdutivo.
+    Aprimorado com prompts melhores e cálculo de confiança.
     """
     prompt = f"""
     Você é um especialista em análise de emails para o setor financeiro.
@@ -84,10 +84,10 @@ def classify_email(text):
         response = model.generate_content(prompt)
         classification = response.text.strip()
         
-        # Enhanced confidence calculation
-        confidence = 0.80  # Base confidence
+        # Cálculo de confiança aprimorado
+        confidence = 0.80  # Confiança base
         
-        # Text length factor (longer emails are usually clearer)
+        # Fator de comprimento do texto (emails mais longos são geralmente mais claros)
         if len(text) > 100:
             confidence += 0.08
         elif len(text) > 50:
@@ -95,28 +95,28 @@ def classify_email(text):
         elif len(text) > 20:
             confidence += 0.03
         
-        # Classification clarity factor
+        # Fator de clareza da classificação
         if classification in ["Produtivo", "Improdutivo"]:
             confidence += 0.07
         
-        # Content complexity factor (emails with specific keywords are clearer)
+        # Fator de complexidade do conteúdo (emails com palavras-chave específicas são mais claros)
         business_keywords = ['suporte', 'problema', 'erro', 'ajuda', 'dúvida', 'solicitação', 'reclamação', 'atualização']
         if any(keyword in text.lower() for keyword in business_keywords):
             confidence += 0.05
         
-        # Response quality factor
+        # Fator de qualidade da resposta
         if len(classification) == len("Produtivo") or len(classification) == len("Improdutivo"):
             confidence += 0.02
             
-        return classification, min(confidence, 0.95)  # Cap at 95% for realism
+        return classification, min(confidence, 0.95)  # Limita em 95% para realismo
     except Exception as e:
-        print(f"Error in classification: {e}")
+        print(f"Erro na classificação: {e}")
         return "Erro na classificação", 0.0
 
 def generate_response(text, classification):
     """
-    Generate an appropriate response based on the email content and classification.
-    Enhanced with better prompts and context awareness.
+    Gera uma resposta apropriada baseada no conteúdo do email e classificação.
+    Aprimorado com prompts melhores e consciência de contexto.
     """
     if classification == "Produtivo":
         prompt = f"""
@@ -166,13 +166,13 @@ def generate_response(text, classification):
         response = model.generate_content(prompt)
         generated_response = response.text.strip()
         
-        # Clean up the response if needed
+        # Limpa a resposta se necessário
         if generated_response.startswith('"') and generated_response.endswith('"'):
             generated_response = generated_response[1:-1]
         
         return generated_response
     except Exception as e:
-        print(f"Error generating response: {e}")
+        print(f"Erro ao gerar resposta: {e}")
         if classification == "Produtivo":
             return "Agradecemos seu contato. Nossa equipe está analisando sua solicitação e retornaremos em breve com uma resposta detalhada."
         else:
@@ -185,69 +185,69 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze_email():
     """
-    Analyze email content and return classification with AI-generated response.
-    Enhanced with better error handling and validation.
+    Analisa o conteúdo do email e retorna a classificação com resposta gerada por IA.
+    Aprimorado com melhor tratamento de erros e validação.
     """
     try:
-        # Check if a file was uploaded
+        # Verifica se um arquivo foi enviado
         if 'file' in request.files:
             file = request.files['file']
             if file.filename == '':
                 return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
             
-            # Check file type and size
+            # Verifica tipo e tamanho do arquivo
             if not file.filename.lower().endswith(('.txt', '.pdf')):
                 return jsonify({'error': 'Formato de arquivo não suportado. Use apenas .txt ou .pdf'}), 400
             
-            # Check file size (max 5MB)
+            # Verifica tamanho do arquivo (máximo 5MB)
             if len(file.read()) > 5 * 1024 * 1024:
                 return jsonify({'error': 'Arquivo muito grande. Tamanho máximo: 5MB'}), 400
             
-            # Reset file pointer
+            # Reseta o ponteiro do arquivo
             file.seek(0)
             
-            # Extract text based on file type
+            # Extrai texto baseado no tipo de arquivo
             if file.filename.lower().endswith('.txt'):
                 try:
                     text = file.read().decode('utf-8')
                 except UnicodeDecodeError:
-                    text = file.read().decode('latin-1')  # Fallback encoding
+                    text = file.read().decode('latin-1')  # Codificação alternativa
             elif file.filename.lower().endswith('.pdf'):
                 text = extract_text_from_pdf(file)
         else:
-            # Get text from request body
+            # Obtém texto do corpo da requisição
             data = request.get_json()
             if not data or 'text' not in data:
                 return jsonify({'error': 'Nenhum texto fornecido'}), 400
             
             text = data['text']
             
-            # Validate text length
+            # Valida comprimento do texto
             if len(text.strip()) < 10:
                 return jsonify({'error': 'Texto muito curto. Mínimo 10 caracteres'}), 400
             if len(text) > 10000:
                 return jsonify({'error': 'Texto muito longo. Máximo 10.000 caracteres'}), 400
         
-        # Preprocess the text
+        # Pré-processa o texto
         processed_text = preprocess_text(text)
         
         if not processed_text.strip():
             return jsonify({'error': 'Não foi possível extrair texto válido do conteúdo'}), 400
         
-        # Classify the email
+        # Classifica o email
         classification, confidence = classify_email(processed_text)
         
-        # Validate classification
+        # Valida a classificação
         if classification not in ["Produtivo", "Improdutivo"]:
             return jsonify({'error': 'Erro na classificação do email'}), 500
         
-        # Generate response
+        # Gera resposta
         response = generate_response(processed_text, classification)
         
-        # Log successful analysis
-        print(f"Email analyzed successfully: {classification} ({confidence:.1%}) - Length: {len(processed_text)} chars")
+        # Registra análise bem-sucedida
+        print(f"Email analisado com sucesso: {classification} ({confidence:.1%}) - Comprimento: {len(processed_text)} caracteres")
         
-        # Return results with enhanced metadata
+        # Retorna resultados com metadados aprimorados
         return jsonify({
             'classification': classification,
             'confidence': round(confidence * 100, 1),
@@ -258,7 +258,7 @@ def analyze_email():
         })
         
     except Exception as e:
-        error_msg = f"Error analyzing email: {str(e)}"
+        error_msg = f"Erro ao analisar email: {str(e)}"
         print(error_msg)
         return jsonify({'error': 'Erro interno do servidor. Tente novamente em alguns instantes.'}), 500
 
