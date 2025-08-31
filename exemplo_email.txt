@@ -1,0 +1,19 @@
+Subject: Solicitação de Suporte Técnico - Sistema de Pagamentos
+
+Prezados,
+
+Estou enfrentando dificuldades para acessar o sistema de pagamentos desde ontem à tarde. Quando tento fazer login, recebo uma mensagem de erro "Sessão expirada" mesmo após inserir minhas credenciais corretas.
+
+Já tentei:
+- Limpar o cache do navegador
+- Usar navegadores diferentes
+- Verificar se minha conta não foi bloqueada
+
+Preciso urgentemente resolver isso pois tenho pagamentos pendentes para processar hoje.
+
+Aguardo retorno urgente.
+
+Atenciosamente,
+João Silva
+Gerente Financeiro
+Empresa ABC Ltda.

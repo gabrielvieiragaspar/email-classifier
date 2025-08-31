@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Classifier - AutoU</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-envelope-open-text me-2"></i>Email Classifier
+            </a>
+            <span class="navbar-text">by AutoU</span>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light btn-sm" id="darkModeToggle" title="Alternar modo escuro">
+                    <i class="fas fa-moon" id="darkModeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-5 hero-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10 col-12 text-center">
+                    <h1 class="display-4 fw-bold mb-4">Classificação Inteligente de Emails</h1>
+                    <p class="lead mb-5">Utilize inteligência artificial para classificar emails automaticamente e gerar respostas contextualizadas.</p>
+                    <div class="d-none d-md-block">
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <span class="badge bg-primary me-2">
+                                    <i class="fas fa-mobile-alt me-1"></i>Mobile Friendly
+                                </span>
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-tablet-alt me-1"></i>Tablet Ready
+                                </span>
+                                <span class="badge bg-info">
+                                    <i class="fas fa-desktop me-1"></i>Desktop Optimized
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="pb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-md-11 col-12">
+                    <div class="card p-4 mb-4">
+                        <h3 class="text-center mb-4"><i class="fas fa-upload me-2"></i>Envie seu email para análise</h3>
+                        
+                        <ul class="nav nav-pills mb-4 justify-content-center flex-column flex-md-row" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">
+                                    <i class="fas fa-upload d-none d-md-inline me-md-2"></i>Upload de Arquivo
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab">
+                                    <i class="fas fa-keyboard d-none d-md-inline me-md-2"></i>Texto Direto
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="upload" role="tabpanel">
+                                <div class="upload-area" id="dropZone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <h5 class="d-none d-md-block">Arraste e solte seu arquivo aqui</h5>
+                                    <h5 class="d-md-none">Toque para selecionar arquivo</h5>
+                                    <p class="text-muted d-none d-md-block">Ou clique para procurar</p>
+                                    <p class="text-muted d-md-none">Selecione um arquivo TXT ou PDF</p>
+                                    <input type="file" id="fileInput" class="d-none" accept=".txt,.pdf">
+                                    <div class="mt-3">
+                                        <button type="button" class="btn btn-outline-primary d-md-none" onclick="document.getElementById('fileInput').click()">
+                                            <i class="fas fa-folder-open me-2"></i>Escolher Arquivo
+                                        </button>
+                                    </div>
+                                    <p class="text-muted mt-3">Formatos suportados: .txt, .pdf</p>
+                                </div>
+                                <div class="selected-file mt-3 text-center" id="selectedFile"></div>
+                            </div>
+                            <div class="tab-pane fade" id="text" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="emailText" class="form-label">Cole o conteúdo do email:</label>
+                                    <textarea class="form-control" id="emailText" rows="6" placeholder="Digite ou cole o conteúdo do email aqui..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button id="analyzeBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-robot me-2"></i>Analisar Email
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 result-card" id="resultCard">
+                        <div class="text-center mb-4">
+                            <h3><i class="fas fa-tasks me-2"></i>Resultado da Análise</h3>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 col-12 mb-3">
+                                <div class="card p-3 h-100 productive">
+                                    <h5><i class="fas fa-chart-line me-2"></i>Classificação:</h5>
+                                    <p id="classificationResult" class="fs-4 fw-bold">Produtivo</p>
+                                    <small class="text-muted">Baseado na análise de IA</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12 mb-3">
+                                <div class="card p-3 h-100">
+                                    <h5><i class="fas fa-brain me-2"></i>Confiança:</h5>
+                                    <p id="confidenceResult" class="fs-4 fw-bold">92%</p>
+                                    <small class="text-muted">Precisão da classificação</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card p-3">
+                                    <h5><i class="fas fa-info-circle me-2"></i>Detalhes da Análise:</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 col-12 mb-2">
+                                            <small class="text-muted">Tamanho do texto:</small>
+                                            <p id="textLength" class="mb-0">0 caracteres</p>
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-2">
+                                            <small class="text-muted">Timestamp:</small>
+                                            <p id="analysisTime" class="mb-0">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-3 mb-4">
+                            <h5><i class="fas fa-comment me-2"></i>Resposta Sugerida:</h5>
+                            <div class="p-3 bg-light rounded mt-2">
+                                <p id="suggestedResponse">Carregando resposta...</p>
+                            </div>
+                            <div class="text-center text-md-end mt-3">
+                                <button class="btn btn-outline-primary w-100 w-md-auto" id="copyResponseBtn">
+                                    <i class="fas fa-copy me-2"></i>Copiar Resposta
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button class="btn btn-outline-secondary w-100 w-md-auto" id="newAnalysisBtn">
+                                <i class="fas fa-redo me-2"></i>Nova Análise
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4" id="loadingSpinner" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Processando...</span>
+                        </div>
+                        <p class="mt-3">Processando seu email com IA. Isso pode levar alguns segundos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Como funciona nossa solução</h2>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                    <div class="card feature-card h-100">
+                        <i class="fas fa-upload feature-icon"></i>
+                        <h4>Upload de Email</h4>
+                        <p>Envie emails em formato TXT ou PDF, ou cole o texto diretamente.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                    <div class="card feature-card h-100">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h4>Análise com IA</h4>
+                        <p>Inteligência Artificial classifica o email como produtivo ou improdutivo.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                    <div class="card feature-card h-100">
+                        <i class="fas fa-reply feature-icon"></i>
+                        <h4>Resposta Automática</h4>
+                        <p>Sugestão de resposta contextualizada baseada na classificação.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">Desenvolvido para o processo seletivo da AutoU • Email Classifier</p>
+        </div>
+    </footer>
+
+    <!-- Mobile Floating Action Button -->
+    <div class="d-md-none position-fixed bottom-0 end-0 m-3" style="z-index: 1000;">
+        <button class="btn btn-primary rounded-circle shadow-lg" id="mobileActionBtn" style="width: 60px; height: 60px;">
+            <i class="fas fa-robot"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
