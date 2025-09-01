@@ -262,5 +262,6 @@ def analyze_email():
         print(error_msg)
         return jsonify({'error': 'Erro interno do servidor. Tente novamente em alguns instantes.'}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+@app.route('/healthz')
+def healthz():
+    return "ok", 200

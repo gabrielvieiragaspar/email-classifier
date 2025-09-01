@@ -19,45 +19,45 @@ class EmailClassifier {
         this.darkModeIcon = document.getElementById('darkModeIcon');
         this.mobileActionBtn = document.getElementById('mobileActionBtn');
         
-        // Check if device is mobile
+        // Verifica se o dispositivo é móvel
         this.isMobile = window.innerWidth <= 768;
         this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     }
 
     bindEvents() {
-        // Drag and drop functionality
+        // Funcionalidade de arrastar e soltar
         this.dropZone.addEventListener('click', () => this.fileInput.click());
         this.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
         this.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
         this.dropZone.addEventListener('drop', this.handleDrop.bind(this));
         
-        // File input change
+        // Mudança no input de arquivo
         this.fileInput.addEventListener('change', this.handleFileInputChange.bind(this));
         
-        // Analyze button
+        // Botão de análise
         this.analyzeBtn.addEventListener('click', this.analyzeEmail.bind(this));
         
-        // Copy response button
+        // Botão de copiar resposta
         this.copyResponseBtn.addEventListener('click', this.copyResponse.bind(this));
         
-        // New analysis button
+        // Botão de nova análise
         this.newAnalysisBtn.addEventListener('click', this.resetForm.bind(this));
         
-        // Dark mode toggle
+        // Alternar modo escuro
         this.darkModeToggle.addEventListener('click', this.toggleDarkMode.bind(this));
         
-        // Initialize dark mode from localStorage
+        // Inicializa modo escuro do localStorage
         this.initializeDarkMode();
         
-        // Mobile-specific event handling
+        // Tratamento de eventos específicos para móvel
         if (this.mobileActionBtn) {
             this.mobileActionBtn.addEventListener('click', this.handleMobileAction.bind(this));
         }
         
-        // Handle window resize for responsive behavior
+        // Manipula redimensionamento da janela para comportamento responsivo
         window.addEventListener('resize', this.handleResize.bind(this));
         
-        // Add touch gesture support for mobile
+        // Adiciona suporte a gestos de toque para móvel
         if (this.isTouchDevice) {
             this.addTouchGestures();
         }
@@ -133,20 +133,20 @@ class EmailClassifier {
             formData.append('text', content);
         }
         
-        // Show loading state
+        // Mostra estado de carregamento
         this.showLoading(true);
         
         try {
             let response;
             
             if (activeTab === 'upload-tab') {
-                // Send file to backend
+                // Envia arquivo para o backend
                 response = await fetch('/analyze', {
                     method: 'POST',
                     body: formData
                 });
             } else {
-                // Send text to backend
+                // Envia texto para o backend
                 response = await fetch('/analyze', {
                     method: 'POST',
                     headers: {
@@ -163,7 +163,7 @@ class EmailClassifier {
             
             const result = await response.json();
             
-            // Validate response
+            // Valida resposta
             if (!result.classification || !result.confidence || !result.response) {
                 throw new Error('Resposta inválida do servidor');
             }
@@ -172,7 +172,7 @@ class EmailClassifier {
             this.showAlert('Email analisado com sucesso!', 'success');
             
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Erro:', error);
             const errorMessage = error.message.includes('Resposta inválida') 
                 ? 'Erro interno do servidor. Tente novamente.' 
                 : error.message;
@@ -183,40 +183,40 @@ class EmailClassifier {
     }
 
     displayResults(result) {
-        // Update classification result with animation
+        // Atualiza resultado da classificação com animação
         const classificationElement = document.getElementById('classificationResult');
         const confidenceElement = document.getElementById('confidenceResult');
         
-        // Animate the classification change
+        // Anima a mudança da classificação
         classificationElement.style.opacity = '0';
         setTimeout(() => {
             classificationElement.textContent = result.classification;
             classificationElement.style.opacity = '1';
         }, 200);
         
-        // Animate the confidence change
+        // Anima a mudança da confiança
         confidenceElement.style.opacity = '0';
         setTimeout(() => {
             confidenceElement.textContent = result.confidence + '%';
             confidenceElement.style.opacity = '1';
         }, 400);
         
-        // Add appropriate class for styling
+        // Adiciona classe apropriada para estilização
         const classificationCard = document.querySelector('#classificationResult').closest('.card');
         classificationCard.classList.remove('productive', 'unproductive');
         classificationCard.classList.add(result.classification === 'Produtivo' ? 'productive' : 'unproductive');
         
-        // Update suggested response with typing effect
+        // Atualiza resposta sugerida com efeito de digitação
         this.typeResponse(result.response);
         
-        // Show results with enhanced animation
+        // Mostra resultados com animação aprimorada
         this.resultCard.style.display = 'block';
         this.resultCard.classList.add('slide-up');
         
-        // Add confidence meter visualization
+        // Adiciona visualização do medidor de confiança
         this.addConfidenceMeter(result.confidence);
         
-        // Update additional metadata
+        // Atualiza metadados adicionais
         if (result.text_length) {
             document.getElementById('textLength').textContent = `${result.text_length} caracteres`;
         }
@@ -225,10 +225,10 @@ class EmailClassifier {
             document.getElementById('analysisTime').textContent = timestamp.toLocaleString('pt-BR');
         }
         
-        // Add success animation
+        // Adiciona animação de sucesso
         this.resultCard.classList.add('fade-in');
         
-        // Scroll to results
+        // Rola para os resultados
         this.resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
@@ -243,7 +243,7 @@ class EmailClassifier {
                 i++;
             } else {
                 clearInterval(typeInterval);
-                // Add a subtle highlight effect
+                // Adiciona um efeito sutil de destaque
                 responseElement.style.background = 'rgba(52, 152, 219, 0.1)';
                 setTimeout(() => {
                     responseElement.style.background = '';
@@ -255,13 +255,13 @@ class EmailClassifier {
     addConfidenceMeter(confidence) {
         const confidenceCard = document.querySelector('#confidenceResult').closest('.card');
         
-        // Remove existing meter if any
+        // Remove medidor existente se houver
         const existingMeter = confidenceCard.querySelector('.confidence-meter');
         if (existingMeter) {
             existingMeter.remove();
         }
         
-        // Create confidence meter
+        // Cria medidor de confiança
         const meterHTML = `
             <div class="confidence-meter mt-2">
                 <div class="confidence-fill" style="width: ${confidence}%"></div>
@@ -275,7 +275,7 @@ class EmailClassifier {
         const responseText = document.getElementById('suggestedResponse').textContent;
         
         navigator.clipboard.writeText(responseText).then(() => {
-            // Show feedback that text was copied
+            // Mostra feedback de que o texto foi copiado
             const originalText = this.copyResponseBtn.innerHTML;
             this.copyResponseBtn.innerHTML = '<i class="fas fa-check me-2"></i>Copiado!';
             this.copyResponseBtn.classList.add('success-feedback');
@@ -285,26 +285,26 @@ class EmailClassifier {
                 this.copyResponseBtn.classList.remove('success-feedback');
             }, 2000);
         }).catch(err => {
-            console.error('Failed to copy text: ', err);
+            console.error('Falha ao copiar texto: ', err);
             this.showAlert('Erro ao copiar texto. Tente selecionar e copiar manualmente.', 'warning');
         });
     }
 
     resetForm() {
-        // Reset the form
+        // Reseta o formulário
         this.currentFile = null;
         this.fileInput.value = '';
         this.selectedFile.innerHTML = '';
         this.emailText.value = '';
         
-        // Hide results
+        // Esconde resultados
         this.resultCard.style.display = 'none';
         this.resultCard.classList.remove('slide-up');
         
-        // Switch to the first tab
+        // Muda para a primeira aba
         document.getElementById('upload-tab').click();
         
-        // Reset button states
+        // Reseta estados dos botões
         this.analyzeBtn.disabled = false;
     }
 
@@ -331,7 +331,7 @@ class EmailClassifier {
         
         document.body.appendChild(alertDiv);
         
-        // Auto-remove after 5 seconds
+        // Remove automaticamente após 5 segundos
         setTimeout(() => {
             if (alertDiv.parentNode) {
                 alertDiv.remove();
@@ -343,7 +343,7 @@ class EmailClassifier {
         const isDark = document.body.classList.toggle('dark-mode');
         localStorage.setItem('darkMode', isDark);
         
-        // Update icon
+        // Atualiza ícone
         if (isDark) {
             this.darkModeIcon.className = 'fas fa-sun';
             this.darkModeToggle.title = 'Alternar modo claro';
@@ -363,10 +363,10 @@ class EmailClassifier {
     }
     
     handleMobileAction() {
-        // Scroll to analyze button on mobile
+        // Rola para o botão de análise no móvel
         this.analyzeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Add visual feedback
+        // Adiciona feedback visual
         this.mobileActionBtn.classList.add('btn-success');
         setTimeout(() => {
             this.mobileActionBtn.classList.remove('btn-success');
@@ -376,14 +376,14 @@ class EmailClassifier {
     handleResize() {
         this.isMobile = window.innerWidth <= 768;
         
-        // Adjust mobile action button visibility
+        // Ajusta visibilidade do botão de ação móvel
         if (this.mobileActionBtn) {
             this.mobileActionBtn.style.display = this.isMobile ? 'block' : 'none';
         }
     }
     
     addTouchGestures() {
-        // Add swipe support for tabs on mobile
+        // Adiciona suporte a deslizar para abas no móvel
         let startX = 0;
         let startY = 0;
         
@@ -398,13 +398,13 @@ class EmailClassifier {
             const diffX = startX - endX;
             const diffY = startY - endY;
             
-            // Horizontal swipe to switch tabs
+            // Deslizar horizontal para trocar abas
             if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
                 if (diffX > 0) {
-                    // Swipe left - go to text tab
+                    // Deslizar para esquerda - vai para aba de texto
                     document.getElementById('text-tab').click();
                 } else {
-                    // Swipe right - go to upload tab
+                    // Deslizar para direita - vai para aba de upload
                     document.getElementById('upload-tab').click();
                 }
             }
@@ -412,7 +412,7 @@ class EmailClassifier {
     }
 }
 
-// Initialize the application when DOM is loaded
+// Inicializa a aplicação quando o DOM é carregado
 document.addEventListener('DOMContentLoaded', function() {
     new EmailClassifier();
 });
